@@ -100,8 +100,23 @@
         android:background="?android:attr/listDivider"
         android:layout_height="2dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:orientation="horizontal">
 
+        <Button
+            android:id="@+id/goBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GO" />
+
+    </LinearLayout>
 </LinearLayout>
+
+
+
+
 
     <!-- The added Spinner -->
 
