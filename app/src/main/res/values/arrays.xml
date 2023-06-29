@@ -11,8 +11,8 @@
         <item></item>
     </string-array>
     <string-array name="spinnerItems">
-        <item>Training - Speed</item>
-        <item>Training - Power</item>
+        <item>Speed Training</item>
+        <item>Power Training</item>
         <item>Fight</item>
     </string-array>
     <string-array name="time_spinner">

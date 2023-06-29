@@ -86,6 +86,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private Button resetButton;
     private Button saveButton;
 
+    private Button goButton;
+
     private boolean recording = false;
 
     private ArrayList<Entry> X_entries;
@@ -206,6 +208,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         stopButton = view.findViewById(R.id.stopBtn);
         resetButton = view.findViewById(R.id.resetBtn);
         saveButton = view.findViewById(R.id.saveBtn);
+        goButton = view.findViewById(R.id.goBtn);
         X_entries = new ArrayList<Entry>();
         Y_entries = new ArrayList<Entry>();
         Z_entries = new ArrayList<Entry>();
@@ -282,10 +285,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (count_recording == 0){
+                if (count_recording == 0) {
                     Toast.makeText(getActivity(), "There is no active recording", Toast.LENGTH_LONG).show();
                 } else {
-                    if (recording){
+                    if (recording) {
                         Toast.makeText(getActivity(), "You need to stop the recording first", Toast.LENGTH_LONG).show();
                         return;
                     }
@@ -308,22 +311,21 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             String csv = "/sdcard/csv_dir/" + fileName + ".csv";
                             CSVWriter csvWriter = null;
                             try {
-                                csvWriter = new CSVWriter(new FileWriter(csv,true));
+                                csvWriter = new CSVWriter(new FileWriter(csv, true));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
 
-                            csvWriter.writeNext(new String[]{"NAME:",fileName});
-                            csvWriter.writeNext(new String[]{"EXPERIMENT TIME:",strDate});
-                            csvWriter.writeNext(new String[]{"ACTIVITY TYPE:",activitySelected});
-                            csvWriter.writeNext(new String[]{"COUNT OF ACTUAL STEPS:",stepsNum});
-                            csvWriter.writeNext(new String[]{"ESTIMATED NUMBER OF STEPS:",String.valueOf(estimated_steps_count)});
-                            csvWriter.writeNext(new String[]{"",""});
-                            csvWriter.writeNext(new String[]{"Time [sec]","ACC X","ACC Y","ACC Z"});
+                            csvWriter.writeNext(new String[]{"NAME:", fileName});
+                            csvWriter.writeNext(new String[]{"EXPERIMENT TIME:", strDate});
+                            csvWriter.writeNext(new String[]{"ACTIVITY TYPE:", activitySelected});
+                            csvWriter.writeNext(new String[]{"COUNT OF ACTUAL STEPS:", stepsNum});
+                            csvWriter.writeNext(new String[]{"ESTIMATED NUMBER OF STEPS:", String.valueOf(estimated_steps_count)});
+                            csvWriter.writeNext(new String[]{"", ""});
+                            csvWriter.writeNext(new String[]{"Time [sec]", "ACC X", "ACC Y", "ACC Z"});
 
-                            for(int i=0; i<count_recording; i++)
-                            {
-                                csvWriter.writeNext(new String[]{String.valueOf(T_entries.get(i).getY() / 1000),String.valueOf(X_entries.get(i).getY()),String.valueOf(Y_entries.get(i).getY()),String.valueOf(Z_entries.get(i).getY())});
+                            for (int i = 0; i < count_recording; i++) {
+                                csvWriter.writeNext(new String[]{String.valueOf(T_entries.get(i).getY() / 1000), String.valueOf(X_entries.get(i).getY()), String.valueOf(Y_entries.get(i).getY()), String.valueOf(Z_entries.get(i).getY())});
                             }
 
                             try {
@@ -345,7 +347,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             LineData data = mpLineChart.getData();
                             ILineDataSet setN = data.getDataSetByIndex(0);
 
-                            while(setN.removeLast()){}
+                            while (setN.removeLast()) {
+                            }
 
                             Toast.makeText(getActivity(), "Saved successfully", Toast.LENGTH_LONG).show();
                         }
@@ -359,6 +362,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                     builder.show();
                 }
+            }
+        });
+
+        goButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openStrengthTrainingActivity();
             }
         });
 
@@ -570,4 +580,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         startActivity(intent);
     }
 
+    private void openStrengthTrainingActivity(){
+        Intent intent = new Intent(getContext(), StrengthTraining.class);
+        startActivity(intent);
+    }
 }
