@@ -374,10 +374,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     openStrengthTrainingActivity();
                 } else if (text.equals("Speed Training")) {
                     openSpeedTrainingActivity();
+                } else if (text.equals("Fight")) {
+                    openFightActivity();
                 }
-                else{
-                    Toast.makeText(getContext(), "Select Power Training", Toast.LENGTH_LONG).show();
-                }
+
 
 
             }
@@ -597,7 +597,12 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void openSpeedTrainingActivity(){
-        Intent intent = new Intent(getContext(), SpeedTraning.class);
+        Intent intent = new Intent(getContext(), SpeedTraining.class);
+        startActivity(intent);
+    }
+
+    private void openFightActivity(){
+        Intent intent = new Intent(getContext(), FightActivity.class);
         startActivity(intent);
     }
 }
