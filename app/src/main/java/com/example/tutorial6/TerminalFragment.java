@@ -372,8 +372,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 String text = modeSpinner.getSelectedItem().toString();
                 if (text.equals("Power Training")){
                     openStrengthTrainingActivity();
+                } else if (text.equals("Speed Training")) {
+                    openSpeedTrainingActivity();
                 }
-                else {
+                else{
                     Toast.makeText(getContext(), "Select Power Training", Toast.LENGTH_LONG).show();
                 }
 
@@ -591,6 +593,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private void openStrengthTrainingActivity(){
         Intent intent = new Intent(getContext(), StrengthTraining.class);
+        startActivity(intent);
+    }
+
+    private void openSpeedTrainingActivity(){
+        Intent intent = new Intent(getContext(), SpeedTraning.class);
         startActivity(intent);
     }
 }

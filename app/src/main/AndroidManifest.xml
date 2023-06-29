@@ -16,6 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".SpeedTraning"
+            android:exported="false" />
+        <activity
             android:name=".StrengthTraining"
             android:exported="false" />
         <activity android:name=".LoadCSV" />
