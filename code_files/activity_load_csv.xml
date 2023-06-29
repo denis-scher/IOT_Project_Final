@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:background="@color/white" />
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:gravity="center_horizontal"
+    android:orientation="horizontal">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="File name:"/>
+
+    <EditText
+        android:id="@+id/FileName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="File name" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/FindFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Find" />
+
+
+    <Button
+        android:id="@+id/button_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="back" />
+    <TextView
+        android:id="@+id/tv_estimated_steps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Estimated Steps: "
+        android:textSize="18sp" />
+
+
+
+</LinearLayout>
