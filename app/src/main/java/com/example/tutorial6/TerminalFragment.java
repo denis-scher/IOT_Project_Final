@@ -104,6 +104,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private int estimated_steps_count = 0;
     private TextView step_counter;
 
+    private Spinner timeSpinner;
+    private Spinner modeSpinner;
+
     /*
      * Lifecycle
      */
@@ -199,8 +202,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         Button buttonCsvShow = (Button) view.findViewById(R.id.openBtn);
 
         // Define Spinner and the options to choose from
-        Spinner modeSpinner = (Spinner) view.findViewById(R.id.mode_spinner);
-        Spinner timeSpinner = (Spinner) view.findViewById(R.id.time_spinner);
+        modeSpinner = (Spinner) view.findViewById(R.id.mode_spinner);
+        timeSpinner = (Spinner) view.findViewById(R.id.time_spinner);
 //        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(), R.array.activity_array, android.R.layout.simple_spinner_item);
 //        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //        spinner.setAdapter(adapter);
@@ -593,16 +596,22 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private void openStrengthTrainingActivity(){
         Intent intent = new Intent(getContext(), StrengthTraining.class);
+        String duration = timeSpinner.getSelectedItem().toString();
+        intent.putExtra("KEY_MESSAGE", duration);
         startActivity(intent);
     }
 
     private void openSpeedTrainingActivity(){
         Intent intent = new Intent(getContext(), SpeedTraining.class);
+        String duration = timeSpinner.getSelectedItem().toString();
+        intent.putExtra("KEY_MESSAGE", duration);
         startActivity(intent);
     }
 
     private void openFightActivity(){
         Intent intent = new Intent(getContext(), FightActivity.class);
+        String duration = timeSpinner.getSelectedItem().toString();
+        intent.putExtra("KEY_MESSAGE", duration);
         startActivity(intent);
     }
 }
