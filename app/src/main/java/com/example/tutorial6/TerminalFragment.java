@@ -199,7 +199,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         Button buttonCsvShow = (Button) view.findViewById(R.id.openBtn);
 
         // Define Spinner and the options to choose from
-        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+        Spinner modeSpinner = (Spinner) view.findViewById(R.id.mode_spinner);
+        Spinner timeSpinner = (Spinner) view.findViewById(R.id.time_spinner);
 //        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(), R.array.activity_array, android.R.layout.simple_spinner_item);
 //        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //        spinner.setAdapter(adapter);
@@ -368,13 +369,21 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         goButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openStrengthTrainingActivity();
+                String text = modeSpinner.getSelectedItem().toString();
+                if (text.equals("Power Training")){
+                    openStrengthTrainingActivity();
+                }
+                else {
+                    Toast.makeText(getContext(), "Select Power Training", Toast.LENGTH_LONG).show();
+                }
+
+
             }
         });
 
 
         // Set the listener to capture selected option
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        modeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(position == 0){
