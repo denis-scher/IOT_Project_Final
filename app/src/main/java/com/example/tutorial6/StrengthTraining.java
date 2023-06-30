@@ -18,6 +18,7 @@ public class StrengthTraining extends AppCompatActivity {
         timeTextView = findViewById(R.id.power_training_text);
         int time = Integer.parseInt(message);
 
+
         // 30000 is the starting time (in milliseconds), 1000 is the interval (also in milliseconds)
 
         new CountDownTimer(3000, 1000) { // 3000 milli seconds is 3 seconds.
@@ -56,4 +57,5 @@ public class StrengthTraining extends AppCompatActivity {
 //        }.start();
 
     }
+
 }

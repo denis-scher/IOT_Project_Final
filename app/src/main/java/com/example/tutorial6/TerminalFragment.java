@@ -47,16 +47,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Queue;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
     private enum Connected { False, Pending, True }
-
+    int punchNumber = 0;
+    int punchFlag = 0;
+    int maxPunchPowerFlag = 0;
+    int[] numOfEachPunch = {0,0,0};
     private String deviceAddress;
     private SerialService service;
 
@@ -102,8 +105,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     Queue<Float> norm_lst;
     Queue<Float> smooth_lst;
     private int estimated_steps_count = 0;
-    private TextView step_counter;
-
+    private TextView punch_counter;
+    private TextView power_punch_counter;
+    private TextView punchingPower;
     private Spinner timeSpinner;
     private Spinner modeSpinner;
 
@@ -213,12 +217,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         resetButton = view.findViewById(R.id.resetBtn);
         saveButton = view.findViewById(R.id.saveBtn);
         goButton = view.findViewById(R.id.goBtn);
+        punch_counter = view.findViewById(R.id.punch_counter);
+        power_punch_counter = view.findViewById(R.id.punch_counter_power);
+        punchingPower = view.findViewById(R.id.punch_power);
         X_entries = new ArrayList<Entry>();
         Y_entries = new ArrayList<Entry>();
         Z_entries = new ArrayList<Entry>();
         T_entries = new ArrayList<Entry>();
         Force_entries = new ArrayList<Entry>();
-
         norm_lst = new LinkedList<>();
         smooth_lst = new LinkedList<>();
 
@@ -281,7 +287,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                 recording = false;
                 estimated_steps_count = 0;
-                step_counter.setText("Steps: " + estimated_steps_count);
+                punch_counter.setText("Steps: " + estimated_steps_count);
 
             }
         });
@@ -341,7 +347,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             count_recording = 0;
                             count_real_time = 0;
                             estimated_steps_count = 0;
-                            step_counter.setText("Steps: " + estimated_steps_count);
+                            punch_counter.setText("Steps: " + estimated_steps_count);
 
 
                             X_entries.clear();
@@ -427,6 +433,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private String[] clean_str(String[] stringsArr){
          for (int i = 0; i < stringsArr.length; i++)  {
              stringsArr[i]=stringsArr[i].replaceAll(" ","");
+             stringsArr[i] = stringsArr[i].replaceAll("(\\r|\\n)", "");
         }
 
 
@@ -529,9 +536,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             PyObject obj = pyf.callAttr("detect_peak", normArray); // Python function name
                             boolean result = obj.toBoolean();
 
-                            if (result && recording){
+                            if (result){
                                 estimated_steps_count++;
-                                step_counter.setText("Steps: " + estimated_steps_count);
+                                punch_counter.setText("Punches: " + estimated_steps_count);
                             }
 
                             norm_lst.clear();
@@ -569,10 +576,51 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     @Override
     public void onSerialRead(byte[] data) {
         try {
-            Log.d("TerminalFragment", "Received: " + new String(data));  // ADD THIS
+            Log.d("TerminalFragment", "Received: " + new String(data) + "Array: " + Arrays.toString(numOfEachPunch));  // ADD THIS
+            String[] parts = new String(data).split(",");
+            parts = clean_str(parts);
+            String the_power_val = parts[4];
+            punchingPower.setText(the_power_val);
+            int power = Integer.parseInt(the_power_val);
+            if (power > 0 && power < 500){
+                punchingPower.setBackgroundColor(Color.RED);
+                if(punchFlag == 0) {
+                    maxPunchPowerFlag = 1;
+                }
+                punchFlag = 1;
+            } else if (power>= 500 && power < 3000){
+                punchingPower.setBackgroundColor(Color.YELLOW);
+                if(punchFlag == 0 || maxPunchPowerFlag == 1){
+                    maxPunchPowerFlag = 2;
+                }
+                punchFlag = 1;
+            } else if (power >= 3000){
+                punchingPower.setBackgroundColor(Color.GREEN);
+                if(maxPunchPowerFlag == 0 || maxPunchPowerFlag == 1 ||maxPunchPowerFlag == 2 ){
+                    maxPunchPowerFlag = 3;
+                }
+                punchFlag = 1;
+            }else {
+                punchingPower.setBackgroundColor(Color.GRAY);
+                if (punchFlag == 1){
+                    punchNumber = punchNumber + 1;
+                    punchFlag = 0;
+                    power_punch_counter.setText(String.valueOf(punchNumber));
+                    if(maxPunchPowerFlag == 1){
+                        numOfEachPunch[0] = numOfEachPunch[0] + 1;
+                    } else if (maxPunchPowerFlag == 2) {
+                        numOfEachPunch[1] = numOfEachPunch[1] + 1;
+                    }else if(maxPunchPowerFlag == 3) {
+                        numOfEachPunch[2] = numOfEachPunch[2] + 1;
+                    }
+                    maxPunchPowerFlag = 0;
+                }
+            }
+
+
             receive(data);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
