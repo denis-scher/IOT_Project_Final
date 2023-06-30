@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.text.InputType;
 import android.text.Spannable;
@@ -108,6 +109,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private TextView punch_counter;
     private TextView power_punch_counter;
     private TextView punchingPower;
+    private TextView timer;
     private Spinner timeSpinner;
     private Spinner modeSpinner;
 
@@ -190,7 +192,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_terminal, container, false);
-
         mpLineChart = (LineChart) view.findViewById(R.id.line_chart);
         lineDataSetN =  new LineDataSet(emptyDataValues(), "N");
         lineDataSetN.setColor(Color.rgb(99,99,99));
@@ -217,6 +218,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         resetButton = view.findViewById(R.id.resetBtn);
         saveButton = view.findViewById(R.id.saveBtn);
         goButton = view.findViewById(R.id.goBtn);
+        timer = view.findViewById(R.id.timer);
         punch_counter = view.findViewById(R.id.punch_counter);
         power_punch_counter = view.findViewById(R.id.punch_counter_power);
         punchingPower = view.findViewById(R.id.punch_power);
@@ -379,8 +381,32 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             @Override
             public void onClick(View view) {
                 String text = modeSpinner.getSelectedItem().toString();
+                int time = Integer.parseInt(timeSpinner.getSelectedItem().toString());
+
                 if (text.equals("Power Training")){
-                    openStrengthTrainingActivity();
+                    new CountDownTimer(3000, 1000) { // 3000 milli seconds is 3 seconds.
+
+                        public void onTick(long millisUntilFinished) {
+                            // You can display the time left here every second.
+                            timer.setText("Get Ready: " + millisUntilFinished / 1000);
+                        }
+
+                        public void onFinish() {
+                            // Start your main timer after 3 seconds have passed.
+                            new CountDownTimer(time *1000, 1000) { // This timer is just an example, adjust as needed.
+
+                                public void onTick(long millisUntilFinished) {
+                                    timer.setText("Time remaining: " + millisUntilFinished / 1000);
+                                }
+
+                                public void onFinish() {
+                                    timer.setText("Done!");
+                                    openStrengthTrainingActivity();
+
+                                }
+                            }.start();
+                        }
+                    }.start();
                 } else if (text.equals("Speed Training")) {
                     openSpeedTrainingActivity();
                 } else if (text.equals("Fight")) {
@@ -644,8 +670,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private void openStrengthTrainingActivity(){
         Intent intent = new Intent(getContext(), StrengthTraining.class);
-        String duration = timeSpinner.getSelectedItem().toString();
-        intent.putExtra("KEY_MESSAGE", duration);
+        int[] message = numOfEachPunch;
+        intent.putExtra("KEY_MESSAGE", message);
+        intent.putExtra("TIME_TRAINED", timeSpinner.getSelectedItem().toString());
         startActivity(intent);
     }
 
@@ -658,8 +685,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private void openFightActivity(){
         Intent intent = new Intent(getContext(), FightActivity.class);
-        String duration = timeSpinner.getSelectedItem().toString();
-        intent.putExtra("KEY_MESSAGE", duration);
+
         startActivity(intent);
     }
 }

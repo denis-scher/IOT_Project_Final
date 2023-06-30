@@ -16,6 +16,7 @@
         <item>Fight</item>
     </string-array>
     <string-array name="time_spinner">
+        <item>15</item>
         <item>30</item>
         <item>45</item>
         <item>60</item>
