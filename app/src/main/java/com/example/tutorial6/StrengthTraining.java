@@ -40,8 +40,8 @@ public class StrengthTraining extends AppCompatActivity {
         mediumPunches.setText("Medium Punches: " + Integer.toString(message[1]));
         strongPunches.setText("Strong Punches: " + Integer.toString(message[2]));
 
-        float rankScore = message[2]/overall;
-        if(rankScore >= 0.85){
+        double rankScore = (double)message[2]/overall;
+        if(rankScore >= 0.7){
             rank.setText("Your Rank: Pro");
         } else if (rankScore >= 0.5) {
             rank.setText("Your Rank: Intermediate");

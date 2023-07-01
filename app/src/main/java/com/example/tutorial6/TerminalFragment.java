@@ -64,6 +64,12 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private String deviceAddress;
     private SerialService service;
 
+    private enum trainingType {
+        POWER,
+        SPEED,
+        NONE
+    }
+    trainingType selectedTrainingType;
 
     private Connected connected = Connected.False;
     private boolean initialStart = true;
@@ -169,6 +175,15 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
+        selectedTrainingType = trainingType.NONE;
+        power_punch_counter.setText("Number of Power Punches");
+        punch_counter.setText("Number of Punches");
+        timer.setText("Timer");
+        punchNumber = 0;
+        estimated_steps_count = 0;
+        for (int i = 0; i < numOfEachPunch.length; i++) {
+            numOfEachPunch[i] = 0;
+        }
     }
 
     @Override
@@ -220,6 +235,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         goButton = view.findViewById(R.id.goBtn);
         timer = view.findViewById(R.id.timer);
         punch_counter = view.findViewById(R.id.punch_counter);
+        punch_counter.setFreezesText(true);
         power_punch_counter = view.findViewById(R.id.punch_counter_power);
         punchingPower = view.findViewById(R.id.punch_power);
         X_entries = new ArrayList<Entry>();
@@ -384,6 +400,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 int time = Integer.parseInt(timeSpinner.getSelectedItem().toString());
 
                 if (text.equals("Power Training")){
+                    selectedTrainingType = trainingType.POWER;
                     new CountDownTimer(3000, 1000) { // 3000 milli seconds is 3 seconds.
 
                         public void onTick(long millisUntilFinished) {
@@ -409,6 +426,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     }.start();
                 } else if (text.equals("Speed Training")) {
                     openSpeedTrainingActivity();
+                    selectedTrainingType = trainingType.SPEED;
                 } else if (text.equals("Fight")) {
                     openFightActivity();
                 }
@@ -561,10 +579,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             PyObject pyf = py.getModule("main"); // Python file name (without .py)
                             PyObject obj = pyf.callAttr("detect_peak", normArray); // Python function name
                             boolean result = obj.toBoolean();
-
-                            if (result){
-                                estimated_steps_count++;
-                                punch_counter.setText("Punches: " + estimated_steps_count);
+                            if(selectedTrainingType == trainingType.SPEED) {
+                                if (result) {
+                                    estimated_steps_count++;
+                                    punch_counter.setText("Punches: " + estimated_steps_count);
+                                }
                             }
 
                             norm_lst.clear();
@@ -603,43 +622,45 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public void onSerialRead(byte[] data) {
         try {
             Log.d("TerminalFragment", "Received: " + new String(data) + "Array: " + Arrays.toString(numOfEachPunch));  // ADD THIS
-            String[] parts = new String(data).split(",");
-            parts = clean_str(parts);
-            String the_power_val = parts[4];
-            punchingPower.setText(the_power_val);
-            int power = Integer.parseInt(the_power_val);
-            if (power > 0 && power < 500){
-                punchingPower.setBackgroundColor(Color.RED);
-                if(punchFlag == 0) {
-                    maxPunchPowerFlag = 1;
-                }
-                punchFlag = 1;
-            } else if (power>= 500 && power < 3000){
-                punchingPower.setBackgroundColor(Color.YELLOW);
-                if(punchFlag == 0 || maxPunchPowerFlag == 1){
-                    maxPunchPowerFlag = 2;
-                }
-                punchFlag = 1;
-            } else if (power >= 3000){
-                punchingPower.setBackgroundColor(Color.GREEN);
-                if(maxPunchPowerFlag == 0 || maxPunchPowerFlag == 1 ||maxPunchPowerFlag == 2 ){
-                    maxPunchPowerFlag = 3;
-                }
-                punchFlag = 1;
-            }else {
-                punchingPower.setBackgroundColor(Color.GRAY);
-                if (punchFlag == 1){
-                    punchNumber = punchNumber + 1;
-                    punchFlag = 0;
-                    power_punch_counter.setText(String.valueOf(punchNumber));
-                    if(maxPunchPowerFlag == 1){
-                        numOfEachPunch[0] = numOfEachPunch[0] + 1;
-                    } else if (maxPunchPowerFlag == 2) {
-                        numOfEachPunch[1] = numOfEachPunch[1] + 1;
-                    }else if(maxPunchPowerFlag == 3) {
-                        numOfEachPunch[2] = numOfEachPunch[2] + 1;
+            if (selectedTrainingType == trainingType.POWER) {
+                String[] parts = new String(data).split(",");
+                parts = clean_str(parts);
+                String the_power_val = parts[4];
+                punchingPower.setText(the_power_val);
+                int power = Integer.parseInt(the_power_val);
+                if (power > 0 && power < 500) {
+                    punchingPower.setBackgroundColor(Color.RED);
+                    if (punchFlag == 0) {
+                        maxPunchPowerFlag = 1;
                     }
-                    maxPunchPowerFlag = 0;
+                    punchFlag = 1;
+                } else if (power >= 500 && power < 3000) {
+                    punchingPower.setBackgroundColor(Color.YELLOW);
+                    if (punchFlag == 0 || maxPunchPowerFlag == 1) {
+                        maxPunchPowerFlag = 2;
+                    }
+                    punchFlag = 1;
+                } else if (power >= 3000) {
+                    punchingPower.setBackgroundColor(Color.GREEN);
+                    if (maxPunchPowerFlag == 0 || maxPunchPowerFlag == 1 || maxPunchPowerFlag == 2) {
+                        maxPunchPowerFlag = 3;
+                    }
+                    punchFlag = 1;
+                } else {
+                    punchingPower.setBackgroundColor(Color.GRAY);
+                    if (punchFlag == 1) {
+                        punchNumber = punchNumber + 1;
+                        punchFlag = 0;
+                        power_punch_counter.setText(String.valueOf(punchNumber));
+                        if (maxPunchPowerFlag == 1) {
+                            numOfEachPunch[0] = numOfEachPunch[0] + 1;
+                        } else if (maxPunchPowerFlag == 2) {
+                            numOfEachPunch[1] = numOfEachPunch[1] + 1;
+                        } else if (maxPunchPowerFlag == 3) {
+                            numOfEachPunch[2] = numOfEachPunch[2] + 1;
+                        }
+                        maxPunchPowerFlag = 0;
+                    }
                 }
             }
 
