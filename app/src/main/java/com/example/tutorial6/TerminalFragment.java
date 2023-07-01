@@ -111,7 +111,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     String strDate;
     Queue<Float> norm_lst;
     Queue<Float> smooth_lst;
-    private int estimated_steps_count = 0;
+    private int estimated_punch_count = 0;
     private TextView punch_counter;
     private TextView power_punch_counter;
     private TextView punchingPower;
@@ -176,11 +176,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             getActivity().runOnUiThread(this::connect);
         }
         selectedTrainingType = trainingType.NONE;
-        power_punch_counter.setText("Number of Power Punches");
+        power_punch_counter.setText("0");
         punch_counter.setText("Number of Punches");
         timer.setText("Timer");
         punchNumber = 0;
-        estimated_steps_count = 0;
+        estimated_punch_count = 0;
         for (int i = 0; i < numOfEachPunch.length; i++) {
             numOfEachPunch[i] = 0;
         }
@@ -304,8 +304,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 while(setN.removeLast()){}
 
                 recording = false;
-                estimated_steps_count = 0;
-                punch_counter.setText("Steps: " + estimated_steps_count);
+                estimated_punch_count = 0;
+                punch_counter.setText("Steps: " + estimated_punch_count);
 
             }
         });
@@ -348,7 +348,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             csvWriter.writeNext(new String[]{"EXPERIMENT TIME:", strDate});
                             csvWriter.writeNext(new String[]{"ACTIVITY TYPE:", activitySelected});
                             csvWriter.writeNext(new String[]{"COUNT OF ACTUAL STEPS:", stepsNum});
-                            csvWriter.writeNext(new String[]{"ESTIMATED NUMBER OF STEPS:", String.valueOf(estimated_steps_count)});
+                            csvWriter.writeNext(new String[]{"ESTIMATED NUMBER OF STEPS:", String.valueOf(estimated_punch_count)});
                             csvWriter.writeNext(new String[]{"", ""});
                             csvWriter.writeNext(new String[]{"Time [sec]", "ACC X", "ACC Y", "ACC Z"});
 
@@ -364,8 +364,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                             count_recording = 0;
                             count_real_time = 0;
-                            estimated_steps_count = 0;
-                            punch_counter.setText("Steps: " + estimated_steps_count);
+                            estimated_punch_count = 0;
+                            punch_counter.setText("Steps: " + estimated_punch_count);
 
 
                             X_entries.clear();
@@ -400,7 +400,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 int time = Integer.parseInt(timeSpinner.getSelectedItem().toString());
 
                 if (text.equals("Power Training")){
-                    selectedTrainingType = trainingType.POWER;
                     new CountDownTimer(3000, 1000) { // 3000 milli seconds is 3 seconds.
 
                         public void onTick(long millisUntilFinished) {
@@ -410,6 +409,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                         public void onFinish() {
                             // Start your main timer after 3 seconds have passed.
+                            selectedTrainingType = trainingType.POWER;
                             new CountDownTimer(time *1000, 1000) { // This timer is just an example, adjust as needed.
 
                                 public void onTick(long millisUntilFinished) {
@@ -425,8 +425,30 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                         }
                     }.start();
                 } else if (text.equals("Speed Training")) {
-                    openSpeedTrainingActivity();
-                    selectedTrainingType = trainingType.SPEED;
+                    new CountDownTimer(3000, 1000) { // 3000 milli seconds is 3 seconds.
+
+                        public void onTick(long millisUntilFinished) {
+                            // You can display the time left here every second.
+                            timer.setText("Get Ready: " + millisUntilFinished / 1000);
+                        }
+
+                        public void onFinish() {
+                            // Start your main timer after 3 seconds have passed.
+                            selectedTrainingType = trainingType.SPEED;
+                            new CountDownTimer(time *1000, 1000) { // This timer is just an example, adjust as needed.
+
+                                public void onTick(long millisUntilFinished) {
+                                    timer.setText("Time remaining: " + millisUntilFinished / 1000);
+                                }
+
+                                public void onFinish() {
+                                    timer.setText("Done!");
+                                    openSpeedTrainingActivity();
+
+                                }
+                            }.start();
+                        }
+                    }.start();
                 } else if (text.equals("Fight")) {
                     openFightActivity();
                 }
@@ -581,8 +603,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                             boolean result = obj.toBoolean();
                             if(selectedTrainingType == trainingType.SPEED) {
                                 if (result) {
-                                    estimated_steps_count++;
-                                    punch_counter.setText("Punches: " + estimated_steps_count);
+                                    estimated_punch_count++;
+                                    power_punch_counter.setText(Integer.toString(estimated_punch_count));
                                 }
                             }
 
@@ -699,8 +721,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private void openSpeedTrainingActivity(){
         Intent intent = new Intent(getContext(), SpeedTraining.class);
-        String duration = timeSpinner.getSelectedItem().toString();
-        intent.putExtra("KEY_MESSAGE", duration);
+        intent.putExtra("TIME_TRAINED", timeSpinner.getSelectedItem().toString());
+        intent.putExtra("NUM_OF_PUNCHES", estimated_punch_count);
         startActivity(intent);
     }
 

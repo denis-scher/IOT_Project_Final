@@ -144,13 +144,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Number of Punches" />
+        android:text="Number of Punches"
+        android:textSize="20sp" />
+
     <TextView
         android:id="@+id/punch_counter_power"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Number of Power Punches"/>
+        android:text="0"
+        android:textSize="18sp" />
     <TextView
         android:id="@+id/punch_power"
         android:layout_width="match_parent"
