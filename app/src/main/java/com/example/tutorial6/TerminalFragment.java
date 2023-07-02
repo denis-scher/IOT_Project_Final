@@ -56,6 +56,10 @@ import java.util.Queue;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
+    private ArrayList<ArrayList<Float>> accData = new ArrayList<>();
+    private ArrayList<Float> accDataX = new ArrayList<>();
+    private ArrayList<Float> accDataY = new ArrayList<>();
+    private ArrayList<Float> accDataZ = new ArrayList<>();
     private enum Connected { False, Pending, True }
     int punchNumber = 0;
     int punchFlag = 0;
@@ -184,6 +188,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         for (int i = 0; i < numOfEachPunch.length; i++) {
             numOfEachPunch[i] = 0;
         }
+        accDataX.clear();
+        accDataY.clear();
+        accDataZ.clear();
+        accData.clear();
     }
 
     @Override
@@ -418,6 +426,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                                 public void onFinish() {
                                     timer.setText("Done!");
+                                    selectedTrainingType = trainingType.NONE;
                                     openStrengthTrainingActivity();
 
                                 }
@@ -443,6 +452,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                                 public void onFinish() {
                                     timer.setText("Done!");
+                                    selectedTrainingType = trainingType.NONE;
+                                    accData.add(accDataX);
+                                    accData.add(accDataY);
+                                    accData.add(accDataZ);
                                     openSpeedTrainingActivity();
 
                                 }
@@ -533,6 +546,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private void receive(byte[] message) {
 
             String msg = new String(message);
+            System.out.println(msg);
             if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
                 // don't show CR as ^M if directly before LF
                 String msg_to_save = msg;
@@ -552,6 +566,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 float F = Float.parseFloat(parts[3]);
                 time = Float.parseFloat(parts[4]);
 
+                if(selectedTrainingType == trainingType.SPEED){
+                    accDataX.add(Float.parseFloat(parts[0]));
+                    accDataY.add(Float.parseFloat(parts[1]));
+                    accDataZ.add(Float.parseFloat(parts[2]));
+                }
 
                 if (recording){
                     Log.d("T", "recording");
@@ -723,6 +742,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         Intent intent = new Intent(getContext(), SpeedTraining.class);
         intent.putExtra("TIME_TRAINED", timeSpinner.getSelectedItem().toString());
         intent.putExtra("NUM_OF_PUNCHES", estimated_punch_count);
+        intent.putExtra("ACC_DATA",accData);
         startActivity(intent);
     }
 
